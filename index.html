@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis — Sanctions Screening API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Top Bar -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" fill="currentColor" opacity="0.9"/>
+                    <path d="M12 2L2 7l10 5 10-5L12 2z" fill="currentColor"/>
+                </svg>
+                <span class="logo-text">Aegis</span>
+                <span class="logo-badge">API Reference</span>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <span class="topbar-meta">Risk &amp; Sanctions · RegTech</span>
+            <a href="https://slack.com" class="topbar-link">#ask-regtech-sanctions</a>
+        </div>
+    </header>
+
+    <div class="layout">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-inner">
+                <div class="nav-section">
+                    <div class="nav-heading">Getting Started</div>
+                    <a href="#overview" class="nav-link active">Overview</a>
+                    <a href="#choosing-integration" class="nav-link">Choosing an Integration</a>
+                    <a href="#authentication" class="nav-link">Authentication &amp; Security</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-heading">Integration Types</div>
+                    <a href="#batch" class="nav-link">Batch Screening</a>
+                    <a href="#batch-bootstrap" class="nav-link nav-link-sub">Bootstrap (One-Time)</a>
+                    <a href="#batch-api" class="nav-link nav-link-sub">Add / Update API</a>
+                    <a href="#adhoc" class="nav-link">Ad-hoc Screening</a>
+                    <a href="#adhoc-produce" class="nav-link nav-link-sub">Produce Inbound</a>
+                    <a href="#adhoc-consume" class="nav-link nav-link-sub">Consume Outbound</a>
+                    <a href="#realtime" class="nav-link">Realtime Screening</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-heading">Reference</div>
+                    <a href="#match-statuses" class="nav-link">Match Statuses</a>
+                    <a href="#errors" class="nav-link">Error Codes</a>
+                    <a href="#support" class="nav-link">Support &amp; Compliance</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Overview Section -->
+            <section id="overview" class="doc-section">
+                <div class="section-content">
+                    <h1>Aegis Sanctions Screening</h1>
+                    <p class="lead">Aegis is Booking.com's centralized Sanctions Screening platform. It protects the business from regulatory threats by screening individuals, businesses, and financial assets against global sanctions lists.</p>
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <span class="info-card-icon">&#9432;</span>
+                            <span>Who is this for?</span>
+                        </div>
+                        <p><strong>Managers</strong> — understand compliance flows and regulatory requirements.</p>
+                        <p><strong>Engineers</strong> — implement the screening integration into your service.</p>
+                    </div>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>Base URLs</span>
+                        </div>
+                        <pre><code><span class="code-comment"># Production</span>
+https://screening-ingress.booking.com
+
+<span class="code-comment"># DQS (Testing)</span>
+https://screening-ingress.dqs.booking.com</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Choosing Integration -->
+            <section id="choosing-integration" class="doc-section">
+                <div class="section-content">
+                    <h2>Choosing an Integration Path</h2>
+                    <p>Select the integration type that matches your screening needs. Each path is optimized for different volumes, frequencies, and latency requirements.</p>
+
+                    <div class="integration-cards">
+                        <div class="int-card">
+                            <div class="int-card-badge batch">Scheduled</div>
+                            <h4>Batch Screening</h4>
+                            <p>For ongoing relationships that need daily screening — partners, hotels, vendors.</p>
+                            <div class="int-card-meta">
+                                <span class="meta-item"><strong>Tech:</strong> CSV + REST API / Java Client</span>
+                                <span class="meta-item"><strong>Response:</strong> Asynchronous (daily/nightly)</span>
+                            </div>
+                        </div>
+                        <div class="int-card">
+                            <div class="int-card-badge adhoc">Ad-hoc</div>
+                            <h4>Ad-hoc Screening</h4>
+                            <p>For unscheduled bulk tasks — large datasets at irregular intervals, payout reports.</p>
+                            <div class="int-card-meta">
+                                <span class="meta-item"><strong>Tech:</strong> Kafka (Event-driven)</span>
+                                <span class="meta-item"><strong>Response:</strong> Asynchronous (eventual consistency)</span>
+                            </div>
+                        </div>
+                        <div class="int-card">
+                            <div class="int-card-badge realtime">Realtime</div>
+                            <h4>Realtime Screening</h4>
+                            <p>For immediate screening — booker reservation requests, instant payout initiation.</p>
+                            <div class="int-card-meta">
+                                <span class="meta-item"><strong>Tech:</strong> REST API (Synchronous)</span>
+                                <span class="meta-item"><strong>Response:</strong> Immediate + async updates</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>Quick Decision Guide</span>
+                        </div>
+                        <pre><code><span class="code-comment"># How to choose:</span>
+
+<span class="code-key">Recurring daily screening?</span>
+  → Batch (Section 3)
+
+<span class="code-key">100+ records, irregular schedule?</span>
+  → Ad-hoc via Kafka (Section 4)
+
+<span class="code-key">Need an answer right now?</span>
+  → Realtime API (Section 5)</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Authentication -->
+            <section id="authentication" class="doc-section">
+                <div class="section-content">
+                    <h2>Authentication &amp; Security</h2>
+                    <p>Security protocols differ based on whether your service is <strong>Internal</strong> (Booking.com infrastructure) or <strong>External</strong> (third-party vendor).</p>
+
+                    <h3>Internal Clients</h3>
+                    <p class="subtle">e.g., ABU, TBU, BDC</p>
+                    <table class="doc-table">
+                        <tbody>
+                            <tr><td class="table-key">Mechanism</td><td>Service Mesh / Harness</td></tr>
+                            <tr><td class="table-key">Requirement</td><td>Register as a consumer of <code>screening-ingress</code></td></tr>
+                            <tr><td class="table-key">PII Access</td><td>Request Soylent permissions via Service Directory</td></tr>
+                            <tr><td class="table-key">Financial Data</td><td>Request Griphook permissions via Service Directory</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>External Clients</h3>
+                    <p class="subtle">e.g., iValua, Salesforce</p>
+                    <table class="doc-table">
+                        <tbody>
+                            <tr><td class="table-key">Mechanism</td><td>API Token + IP Whitelisting</td></tr>
+                            <tr><td class="table-key">Encryption</td><td>TLS 1.2+ for transit, PGP for PII payload fields</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>External Authentication Header</span>
+                        </div>
+                        <pre><code><span class="code-key">X-Booking-Authentication:</span> <span class="code-string">&lt;Your-Provided-Token&gt;</span></code></pre>
+                    </div>
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>PII Encryption (External)</span>
+                        </div>
+                        <pre><code><span class="code-comment"># All PII fields must be:</span>
+<span class="code-comment"># 1. PGP encrypted with Aegis Public Key</span>
+<span class="code-comment"># 2. Base64 encoded</span>
+
+"full_name": "<span class="code-string">base64(pgp_encoded(...))</span>"</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Batch Screening -->
+            <section id="batch" class="doc-section">
+                <div class="section-content">
+                    <h2>Batch Screening</h2>
+                    <p class="lead">For partners, vendors, and affiliates that require ongoing scheduled screening.</p>
+                    <p>Batch screening uses a <strong>synchronization model</strong>. You don't ask Aegis to "screen this partner" — you tell Aegis "here is the current state of this partner," and Aegis handles daily screening against the latest sanctions lists.</p>
+
+                    <div class="callout">
+                        <strong>Key concept:</strong> You own the data, Aegis owns the screening schedule.
+                    </div>
+
+                    <h3>Common Use Cases</h3>
+                    <ul>
+                        <li><strong>Daily Partner Screening</strong> — Ensure all active partners (ABU, TBU) are screened every 24 hours.</li>
+                        <li><strong>Payout Screening</strong> — Screen all bank details linked to partners before payouts are processed.</li>
+                    </ul>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>Batch Endpoints</span>
+                        </div>
+                        <pre><code><span class="code-method">POST</span> <span class="code-string">/v1/batch-add</span>
+<span class="code-comment"># Add new entities to screening</span>
+
+<span class="code-method">POST</span> <span class="code-string">/v1/batch-add</span>
+<span class="code-comment"># Update existing entity data</span></code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bootstrap -->
+            <section id="batch-bootstrap" class="doc-section">
+                <div class="section-content">
+                    <h3>Phase 1: Bootstrap (One-Time)</h3>
+                    <p>To initialize a new relationship, provide a CSV dump of your existing data, encrypted with the Aegis PGP Key.</p>
+
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <span class="info-card-icon">&#128161;</span>
+                            <span>Skip this step</span>
+                        </div>
+                        <p>The one-time CSV load can be skipped entirely by using the Add/Update API directly for initial data loading.</p>
+                    </div>
+
+                    <table class="doc-table">
+                        <tbody>
+                            <tr><td class="table-key">Format</td><td>CSV (Comma Delimited)</td></tr>
+                            <tr><td class="table-key">Files</td><td>Separate files for <code>individual</code>, <code>business</code>, and <code>financial</code></td></tr>
+                            <tr><td class="table-key">Headers</td><td>Must match data fields agreed with FCRM &amp; Sanctions</td></tr>
+                            <tr><td class="table-key">Delivery</td><td>Secure email / SFTP (Contact RegTech for setup)</td></tr>
+                            <tr><td class="table-key">Encryption</td><td>PGP encrypted with Aegis Public Key</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>Sample Encrypted File</span>
+                        </div>
+                        <pre><code>Individual_Screening_csv.gpg
+Business_Screening_csv.gpg
+Financial_Screening_csv.gpg</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Batch Add/Update API -->
+            <section id="batch-api" class="doc-section">
+                <div class="section-content">
+                    <h3>Phase 2: Add / Update API</h3>
+                    <p>Once bootstrapped, use the API to <strong>ADD</strong> new entities or <strong>UPDATE</strong> existing ones. This endpoint is asynchronous.</p>
+
+                    <div class="operation-group">
+                        <div class="operation">
+                            <span class="op-badge op-add">ADD</span>
+                            <p>Sync newly onboarded data with Aegis so it is screened at the pre-defined frequency.</p>
+                        </div>
+                        <div class="operation">
+                            <span class="op-badge op-update">UPDATE</span>
+                            <p>Send when any screening-relevant data changes (e.g., partner updates their name).</p>
+                        </div>
+                    </div>
+
+                    <div class="callout callout-warn">
+                        <strong>Important:</strong> You must send the entire record (and any linked records) as part of the update call, not just the fields that changed.
+                    </div>
+
+                    <div class="tab-group">
+                        <button class="tab active" data-tab="rest">REST API</button>
+                        <button class="tab" data-tab="java">Java Client</button>
+                    </div>
+
+                    <div class="tab-content active" id="tab-rest">
+                        <p class="subtle">Best for external systems (Salesforce, iValua)</p>
+                        <table class="doc-table">
+                            <tbody>
+                                <tr><td class="table-key">DQS</td><td><code>POST https://screening-ingress.dqs.booking.com/v1/batch-add</code></td></tr>
+                                <tr><td class="table-key">Production</td><td><code>POST https://screening-ingress.booking.com/v1/batch-add</code></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-content" id="tab-java">
+                        <p class="subtle">Best for internal Booking systems. Handles Soylent/Griphook tokenization automatically.</p>
+                    </div>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel" data-for-tab="rest">
+                        <div class="code-panel-header">
+                            <div class="code-panel-tabs">
+                                <button class="code-tab active" data-codetab="request">Request</button>
+                                <button class="code-tab" data-codetab="response-ok">200 OK</button>
+                                <button class="code-tab" data-codetab="response-err">400 Error</button>
+                            </div>
+                        </div>
+                        <div class="code-tab-content active" id="codetab-request">
+                            <pre><code><span class="code-method">POST</span> /v1/batch-add
+<span class="code-key">Content-Type:</span> application/json
+<span class="code-key">X-Booking-Authentication:</span> &lt;token&gt;
+
+{
+  <span class="code-key">"business_id"</span>: <span class="code-string">"42"</span>,
+  <span class="code-key">"business_id_type"</span>: <span class="code-string">"iValuaSupplierId"</span>,
+  <span class="code-key">"client"</span>: <span class="code-string">"iValua"</span>,
+  <span class="code-key">"entities"</span>: [
+    {
+      <span class="code-key">"business_body"</span>: {
+        <span class="code-key">"external_id"</span>: <span class="code-string">"42"</span>,
+        <span class="code-key">"business_id"</span>: <span class="code-string">"42"</span>,
+        <span class="code-key">"business_id_type"</span>: <span class="code-string">"iValuaSupplierId"</span>,
+        <span class="code-key">"business_unit"</span>: <span class="code-string">"iValua"</span>,
+        <span class="code-key">"full_name"</span>: <span class="code-string">"base64(pgp(...))"</span>,
+        <span class="code-key">"asset_type"</span>: <span class="code-string">"vendor"</span>,
+        <span class="code-key">"entity_type"</span>: <span class="code-string">"Business"</span>,
+        <span class="code-key">"country"</span>: <span class="code-string">"base64(pgp(...))"</span>,
+        <span class="code-key">"state"</span>: <span class="code-string">"ACTIVATED"</span>
+      }
+    },
+    {
+      <span class="code-key">"individual_body"</span>: {
+        <span class="code-key">"external_id"</span>: <span class="code-string">"42"</span>,
+        <span class="code-key">"full_name"</span>: <span class="code-string">"base64(pgp(...))"</span>,
+        <span class="code-key">"entity_type"</span>: <span class="code-string">"Individual"</span>,
+        <span class="code-key">"date_of_birth"</span>: <span class="code-string">"base64(pgp(...))"</span>,
+        <span class="code-key">"citizenship"</span>: <span class="code-string">"base64(pgp(...))"</span>,
+        <span class="code-key">"state"</span>: <span class="code-string">"ACTIVATED"</span>
+      }
+    },
+    {
+      <span class="code-key">"bank_details_body"</span>: {
+        <span class="code-key">"external_id"</span>: <span class="code-string">"42"</span>,
+        <span class="code-key">"account_holder_name"</span>: <span class="code-string">"base64(pgp(...))"</span>,
+        <span class="code-key">"swift_bic_number"</span>: <span class="code-string">"base64(pgp(...))"</span>,
+        <span class="code-key">"country"</span>: <span class="code-string">"base64(pgp(...))"</span>,
+        <span class="code-key">"state"</span>: <span class="code-string">"ACTIVATED"</span>
+      }
+    }
+  ]
+}</code></pre>
+                        </div>
+                        <div class="code-tab-content" id="codetab-response-ok">
+                            <pre><code><span class="code-comment">// 200 OK</span>
+
+{
+  <span class="code-key">"status"</span>: <span class="code-string">"OK"</span>
+}</code></pre>
+                        </div>
+                        <div class="code-tab-content" id="codetab-response-err">
+                            <pre><code><span class="code-comment">// 400 Bad Request</span>
+
+{
+  <span class="code-key">"error"</span>: <span class="code-string">"errorDescription"</span>
+}</code></pre>
+                        </div>
+                    </div>
+                    <div class="code-panel" data-for-tab="java" style="display:none;">
+                        <div class="code-panel-header">
+                            <span>Java Client</span>
+                        </div>
+                        <pre><code><span class="code-comment">&lt;!-- pom.xml --&gt;</span>
+&lt;<span class="code-key">dependency</span>&gt;
+  &lt;<span class="code-key">groupId</span>&gt;com.booking.sanctions&lt;/<span class="code-key">groupId</span>&gt;
+  &lt;<span class="code-key">artifactId</span>&gt;client&lt;/<span class="code-key">artifactId</span>&gt;
+  &lt;<span class="code-key">version</span>&gt;${latest.version}&lt;/<span class="code-key">version</span>&gt;
+&lt;/<span class="code-key">dependency</span>&gt;</code></pre>
+                        <pre><code><span class="code-comment">// Java Usage</span>
+SanctionsClient client = <span class="code-key">new</span> SanctionsClient();
+
+<span class="code-comment">// Handles Soylent/Griphook tokenization</span>
+client.addOrUpdateBatchData(
+  BatchDataRequest.builder()
+    .withBusinessUnit(<span class="code-string">"ABU"</span>)
+    .withEntity(myEntityObject)
+    .build()
+);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ad-hoc Screening -->
+            <section id="adhoc" class="doc-section">
+                <div class="section-content">
+                    <h2>Ad-hoc Screening</h2>
+                    <p class="lead">For bulk analysis, irregular reporting, and large datasets (100+ records).</p>
+                    <p>Ad-hoc screening is event-driven. You produce a message to a Kafka topic, and Aegis consumes, screens, and produces a result message back to an outbound topic.</p>
+
+                    <h3>Kafka Configuration</h3>
+                    <table class="doc-table">
+                        <thead>
+                            <tr><th>Setting</th><th>DQS</th><th>Production</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="table-key">Cluster Federation</td><td><code>central</code></td><td><code>central</code></td></tr>
+                            <tr><td class="table-key">Inbound Topic</td><td colspan="2"><code>aegis_integrator_sanction-screening-in</code></td></tr>
+                            <tr><td class="table-key">Outbound Topic</td><td colspan="2"><code>aegis_integrator_sanction-screening-out</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>Schema Registry</span>
+                        </div>
+                        <pre><code><span class="code-comment"># DQS</span>
+<span class="code-method">$</span> bkstreaming schemas create \
+  --environment dqs \
+  --project aegis \
+  --service integrator \
+  --subject com.booking.aegis.sanctions\
+    .schemas.SanctionScreeningOutboundEvent \
+  &lt;SanctionScreeningOutboundEvent.avsc
+
+<span class="code-comment"># Production</span>
+<span class="code-method">$</span> bkstreaming schemas create \
+  --environment prod \
+  --project aegis \
+  --service integrator \
+  --subject com.booking.aegis.sanctions\
+    .schemas.SanctionScreeningOutboundEvent \
+  &lt;SanctionScreeningOutboundEvent.avsc</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Produce Inbound -->
+            <section id="adhoc-produce" class="doc-section">
+                <div class="section-content">
+                    <h3>Step 1: Produce Inbound Message</h3>
+                    <p>Send a message to the inbound Kafka topic with the entities you want screened.</p>
+
+                    <table class="doc-table">
+                        <thead>
+                            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="table-key">request_id</td><td><code>string</code></td><td>Unique UUID for tracking</td></tr>
+                            <tr><td class="table-key">source</td><td><code>string</code></td><td>Your business unit identifier</td></tr>
+                            <tr><td class="table-key">processing_priority</td><td><code>enum</code></td><td><code>HIGH</code> | <code>MEDIUM</code> | <code>LOW</code></td></tr>
+                            <tr><td class="table-key">business</td><td><code>array</code></td><td>Business entities to screen</td></tr>
+                            <tr><td class="table-key">individual</td><td><code>array</code></td><td>Individual entities to screen</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>Inbound Message</span>
+                        </div>
+                        <pre><code>{
+  <span class="code-key">"request_id"</span>: <span class="code-string">"req-uuid-555"</span>,
+  <span class="code-key">"timestamp"</span>: <span class="code-string">"2026-01-01T12:00:00Z"</span>,
+  <span class="code-key">"source"</span>: <span class="code-string">"BDC"</span>,
+  <span class="code-key">"processing_priority"</span>: <span class="code-string">"HIGH"</span>,
+  <span class="code-key">"business"</span>: [
+    {
+      <span class="code-key">"external_id"</span>: <span class="code-string">"TBU-BUS-001"</span>,
+      <span class="code-key">"business_name"</span>: <span class="code-string">"encrypted(Soylent:COMPANIES)"</span>,
+      <span class="code-key">"country"</span>: <span class="code-string">"NL"</span>,
+      <span class="code-key">"asset_type"</span>: <span class="code-string">"HOTEL"</span>
+    }
+  ],
+  <span class="code-key">"individual"</span>: [
+    {
+      <span class="code-key">"external_id"</span>: <span class="code-string">"TBU-IND-005"</span>,
+      <span class="code-key">"full_name"</span>: <span class="code-string">"encrypted(Soylent:NAMES)"</span>,
+      <span class="code-key">"citizenship"</span>: <span class="code-string">"encrypted(Soylent:ADDRESSES)"</span>
+    }
+  ]
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Consume Outbound -->
+            <section id="adhoc-consume" class="doc-section">
+                <div class="section-content">
+                    <h3>Step 2: Consume Outbound Result</h3>
+                    <p>Listen to the outbound topic for the screening result. The <code>request_id</code> correlates with your original message.</p>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>Outbound Result</span>
+                        </div>
+                        <pre><code>{
+  <span class="code-key">"request_id"</span>: <span class="code-string">"req-uuid-555"</span>,
+  <span class="code-key">"external_id"</span>: <span class="code-string">"TBU-IND-005"</span>,
+  <span class="code-key">"match_summary"</span>: {
+    <span class="code-key">"overall_status"</span>: <span class="code-string">"POTENTIAL_MATCH"</span>,
+    <span class="code-key">"entities"</span>: [
+      {
+        <span class="code-key">"entity_type"</span>: <span class="code-string">"INDIVIDUAL"</span>,
+        <span class="code-key">"match_status"</span>: <span class="code-string">"POTENTIAL_MATCH"</span>
+      }
+    ]
+  },
+  <span class="code-key">"errors"</span>: []
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Match Statuses -->
+            <section id="match-statuses" class="doc-section">
+                <div class="section-content">
+                    <h2>Match Statuses</h2>
+                    <p>Every screening result returns one of four statuses:</p>
+
+                    <div class="status-grid">
+                        <div class="status-card status-clear">
+                            <div class="status-header">
+                                <span class="status-badge badge-clear">SCREENED</span>
+                            </div>
+                            <p>No hits found. Safe to proceed with onboarding or payout.</p>
+                        </div>
+                        <div class="status-card status-potential">
+                            <div class="status-header">
+                                <span class="status-badge badge-potential">POTENTIAL_MATCH</span>
+                            </div>
+                            <p>Possible hit. <strong>Do not payout or onboard.</strong> Manual review triggered internally.</p>
+                        </div>
+                        <div class="status-card status-true">
+                            <div class="status-header">
+                                <span class="status-badge badge-true">TRUE_MATCH</span>
+                            </div>
+                            <p>Confirmed sanction hit. <strong>Must block immediately.</strong></p>
+                        </div>
+                        <div class="status-card status-fp">
+                            <div class="status-header">
+                                <span class="status-badge badge-fp">FALSE_POSITIVE</span>
+                            </div>
+                            <p>Flagged but cleared by analyst. Safe to proceed.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>Status Handling Example</span>
+                        </div>
+                        <pre><code><span class="code-comment">// Pseudocode: handling match status</span>
+
+<span class="code-key">switch</span> (result.overall_status) {
+  <span class="code-key">case</span> <span class="code-string">"SCREENED"</span>:
+    proceed();
+    <span class="code-key">break</span>;
+
+  <span class="code-key">case</span> <span class="code-string">"POTENTIAL_MATCH"</span>:
+    holdTransaction();
+    <span class="code-comment">// Wait for analyst review</span>
+    <span class="code-key">break</span>;
+
+  <span class="code-key">case</span> <span class="code-string">"TRUE_MATCH"</span>:
+    blockImmediately();
+    escalate();
+    <span class="code-key">break</span>;
+
+  <span class="code-key">case</span> <span class="code-string">"FALSE_POSITIVE"</span>:
+    proceed();
+    <span class="code-key">break</span>;
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Realtime -->
+            <section id="realtime" class="doc-section">
+                <div class="section-content">
+                    <h2>Realtime Screening</h2>
+                    <p class="lead">For immediate screening at the point of action — onboarding, reservations, payments.</p>
+                    <p>Unlike Batch (scheduled) or Ad-hoc (event-driven), the Realtime API provides an <strong>initial synchronous response</strong>, optionally followed by asynchronous updates based on analyst review.</p>
+
+                    <h3>Common Use Cases</h3>
+                    <ul>
+                        <li><strong>Reservation Requests</strong> — Check a guest or booker at the moment of reservation.</li>
+                        <li><strong>Instant Data Updates</strong> — Verify a change in user details immediately.</li>
+                        <li><strong>Payor Screening</strong> — Check the payer name at the time of payment.</li>
+                    </ul>
+
+                    <div class="info-card info-card-coming">
+                        <div class="info-card-header">
+                            <span class="info-card-icon">&#128679;</span>
+                            <span>Coming Soon</span>
+                        </div>
+                        <p>Detailed integration documentation for the Realtime API is being finalized. Contact <strong>#ask-regtech-sanctions</strong> for early access.</p>
+                    </div>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>Realtime Flow</span>
+                        </div>
+                        <pre><code><span class="code-comment"># Synchronous initial response</span>
+Client → <span class="code-method">POST</span> /v1/screen
+     ← 200 { status: <span class="code-string">"SCREENED"</span> }
+
+<span class="code-comment"># Or, if manual review needed:</span>
+Client → <span class="code-method">POST</span> /v1/screen
+     ← 200 { status: <span class="code-string">"PENDING_REVIEW"</span> }
+
+<span class="code-comment"># Async update via Kafka/webhook</span>
+     ← { status: <span class="code-string">"FALSE_POSITIVE"</span> }</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Errors -->
+            <section id="errors" class="doc-section">
+                <div class="section-content">
+                    <h2>Error Codes</h2>
+                    <p>Errors returned in the screening response indicate issues with your request or downstream systems.</p>
+
+                    <div class="error-list">
+                        <div class="error-item">
+                            <div class="error-header">
+                                <code class="error-code">INVALID_DATA</code>
+                                <span class="error-action action-fix">Fix &amp; Retry</span>
+                            </div>
+                            <p>Data is malformed, incomplete, or contains invalid values — missing required fields, incorrect data types, malformed UUIDs.</p>
+                        </div>
+                        <div class="error-item">
+                            <div class="error-header">
+                                <code class="error-code">DUPLICATE_DATA</code>
+                                <span class="error-action action-ok">No Action Needed</span>
+                            </div>
+                            <p>The entity (source, externalId, requestId) already exists. The original record will be processed.</p>
+                        </div>
+                        <div class="error-item">
+                            <div class="error-header">
+                                <code class="error-code">VALIDATION_ERROR</code>
+                                <span class="error-action action-fix">Fix &amp; Retry</span>
+                            </div>
+                            <p>Data fails business validation — invalid field combinations, business logic constraints, field length violations.</p>
+                        </div>
+                        <div class="error-item">
+                            <div class="error-header">
+                                <code class="error-code">VENDOR_ERROR</code>
+                                <span class="error-action action-review">Under Review</span>
+                            </div>
+                            <p>Error from the screening vendor (e.g., name doesn't meet minimum screening requirements). Contact RegTech for guidance.</p>
+                        </div>
+                        <div class="error-item">
+                            <div class="error-header">
+                                <code class="error-code">UNKNOWN_ERROR</code>
+                                <span class="error-action action-wait">Retry Later</span>
+                            </div>
+                            <p>Unexpected system error during processing. May be handled internally — retry after some time.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>Error Response Shape</span>
+                        </div>
+                        <pre><code>{
+  <span class="code-key">"request_id"</span>: <span class="code-string">"req-uuid-555"</span>,
+  <span class="code-key">"external_id"</span>: <span class="code-string">"TBU-IND-005"</span>,
+  <span class="code-key">"match_summary"</span>: <span class="code-key">null</span>,
+  <span class="code-key">"errors"</span>: [
+    {
+      <span class="code-key">"code"</span>: <span class="code-string">"INVALID_DATA"</span>,
+      <span class="code-key">"message"</span>: <span class="code-string">"Missing required field: full_name"</span>
+    }
+  ]
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Support -->
+            <section id="support" class="doc-section">
+                <div class="section-content">
+                    <h2>Support &amp; Compliance</h2>
+
+                    <h3>Non-Functional Requirements</h3>
+                    <div class="requirements-list">
+                        <div class="req-item">
+                            <div class="req-label">Retries</div>
+                            <p>Your integration <strong>must</strong> implement exponential backoff retries for 4xx/5xx API errors.</p>
+                        </div>
+                        <div class="req-item">
+                            <div class="req-label">Logging</div>
+                            <p>Do <strong>not</strong> log PII in your application logs when debugging Aegis errors.</p>
+                        </div>
+                        <div class="req-item">
+                            <div class="req-label">Test Data</div>
+                            <p>Do <strong>not</strong> use real PII in DQS environments. Use the Skeleton Test Plan provided by RegTech.</p>
+                        </div>
+                    </div>
+
+                    <h3>Contact</h3>
+                    <table class="doc-table">
+                        <tbody>
+                            <tr><td class="table-key">Slack</td><td><a href="#">#ask-regtech-sanctions</a></td></tr>
+                            <tr><td class="table-key">Team</td><td>Risk &amp; Sanctions · RegTech</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="footer-meta">
+                        <p>Last updated: February 1, 2026</p>
+                    </div>
+                </div>
+                <div class="section-code">
+                    <div class="code-panel">
+                        <div class="code-panel-header">
+                            <span>Retry Implementation</span>
+                        </div>
+                        <pre><code><span class="code-comment">// Exponential backoff example</span>
+
+<span class="code-key">const</span> MAX_RETRIES = <span class="code-string">5</span>;
+
+<span class="code-key">async function</span> screenWithRetry(payload) {
+  <span class="code-key">for</span> (<span class="code-key">let</span> i = 0; i &lt; MAX_RETRIES; i++) {
+    <span class="code-key">try</span> {
+      <span class="code-key">return await</span> fetch(URL, {
+        method: <span class="code-string">"POST"</span>,
+        headers: {
+          <span class="code-string">"X-Booking-Authentication"</span>: token
+        },
+        body: JSON.stringify(payload)
+      });
+    } <span class="code-key">catch</span> (err) {
+      <span class="code-key">if</span> (i === MAX_RETRIES - 1) <span class="code-key">throw</span> err;
+      <span class="code-key">await</span> sleep(Math.pow(2, i) * 1000);
+    }
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
